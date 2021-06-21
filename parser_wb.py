@@ -3,10 +3,10 @@ import re
 import json
 from bs4 import BeautifulSoup
 
+"""def get_name_to_look():
 
-def get_name_to_look():
     name_to_look = input('Введите наименование искомого товара: ')
-    return name_to_look
+    return name_to_look"""
 
 def pars_wildberies_items(name_for_search):
     first_url_for_search = f'https://wbxsearch.wildberries.ru/suggests/male?query={name_for_search}'
@@ -27,17 +27,25 @@ def pars_wildberies_items(name_for_search):
     row_dict_items = json.loads(row_items[0])
     return row_dict_items['products']
 
+def get_items_id_dict(name_for_search):
 
-def price_items():
-    ready_array = []
-    items_array = pars_wildberies_items(get_name_to_look())
+    items_id_array = pars_wildberies_items(name_for_search)
+    return [x.get('id') for x in items_id_array]
 
 
-    for item in items_array:
-        ready_array.append(item.get('id'))
-    return ready_array
+def get_full_info_dict_items(text):
+    items_id_array = get_items_id_dict(text)
+    for item in items_id_array:
+        url_for_search = f'https://www.wildberries.ru/catalog/{item}/detail.aspx'
+        responce_url = requests.get(url_for_search)
+        get_responce_url = BeautifulSoup(responce_url.text, 'lxml')
+        name = re.findall('<meta content="(.*)" itemprop="name"\/>', str(get_responce_url))
+        image_url = re.findall('<meta content="(.*)" itemprop="image"\/>', str(get_responce_url))
+        price = re.findall('<meta content="(.*)" itemprop="price"\/>', str(get_responce_url))
+        return url_for_search, item, name, price, image_url
 
-print(price_items())
+
+#print(get_full_info_dict_items())
 
 
 
