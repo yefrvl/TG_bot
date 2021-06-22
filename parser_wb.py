@@ -9,10 +9,16 @@ from bs4 import BeautifulSoup
     return name_to_look"""
 
 def pars_wildberies_items(name_for_search):
-    first_url_for_search = f'https://wbxsearch.wildberries.ru/suggests/male?query={name_for_search}'
+    try:
+        first_url_for_search = f'https://wbxsearch.wildberries.ru/suggests/male?query={name_for_search}'
+    except False:
+        first_url_for_search = f'https://wbxsearch.wildberries.ru/exactmatch/v2/male?query={name_for_search}'
+    except False:
+        first_url_for_search = f'https://www.wildberries.ru/search/exactmatch/male?query={name_for_search}'
     responce_first_url = requests.get(first_url_for_search)
     get_responce_firs_url = BeautifulSoup(responce_first_url.text, 'lxml')
-    get_query_item = re.findall('"query":"(.*)","name', str(get_responce_firs_url))
+    get_query_item = re.findall('"query":"(.{15})","name', str(get_responce_firs_url))
+    print(get_query_item)
     second_url_for_search = f'https://wbxcatalog-ru.wildberries.ru/presets/bucket_139/catalog?spp=15&' \
                   f'regions=64,79,4,38,30,33,70,1,22,31,66,40,69,80,48,68&stores=119261,122252,' \
                   f'122256,121631,122466,122467,122495,122496,122498,122590,122591,122592,123816,123817,' \
@@ -23,9 +29,18 @@ def pars_wildberies_items(name_for_search):
                   f'Bconsists&xparams=preset%3D10946560&xshard=presets%2Fbucket_139&'
     responce_second_url = requests.get(second_url_for_search)
     get_responce_second_url = BeautifulSoup(responce_second_url.text, 'lxml')
-    row_items = re.findall(r'data":(.*)}<\/p>', str(BeautifulSoup(get_responce_second_url.text, 'lxml')))
-    row_dict_items = json.loads(row_items[0])
-    return row_dict_items['products']
+    print(get_responce_second_url)
+
+    try:
+        row_items = re.findall(r'data":(.*)}<\/p>', str(BeautifulSoup(get_responce_second_url.text, 'lxml')))
+        row_dict_items = json.loads(row_items[0])
+        return row_dict_items['products']
+
+    except IndexError:
+        row_items = re.findall(r'"query":"(.*)",', str(BeautifulSoup(get_responce_second_url.text, 'lxml')))
+        return row_items
+
+
 
 def get_items_id_dict(name_for_search):
 
