@@ -4,16 +4,12 @@ import json
 from bs4 import BeautifulSoup
 from config import url_array
 
-
-
 def replace_space_to_plus(name):
 
     """Функция посредством регулярного выражения заменяет пробелы на знак плюса
     в переменной ссылки для поиска"""
 
     search_name = re.sub(r'( )', '+', name)
-
-
     return search_name
 
 def get_first_url(name_for_search, url_array, i=0):
@@ -40,7 +36,6 @@ def get_first_url(name_for_search, url_array, i=0):
 
 def pars_wildberies_items(name_for_search):
 
-
     get_responce_from_first_url = get_first_url(name_for_search, url_array)
 
     if 'preset=10204659' not in get_responce_from_first_url:
@@ -50,11 +45,9 @@ def pars_wildberies_items(name_for_search):
                                 f'123820,123821,123822,124096,124097,124098,124583,124584,118019,1699,116433,117501,' \
                                 f'507,3158,120762,119400,117986,2737,117413,119781&pricemarginCoeff=1.0&reg=1&' \
                                 f'appType=1&offlineBonus=0&onlineBonus=0&emp=0&locale=ru&lang=ru&curr=rub&' \
-                                f'couponsGeo=2,6,7,3,19,21,8&search={search_name}'
-    else:
+                                f'couponsGeo=2,6,7,3,19,21,8&search={replace_space_to_plus(name_for_search)}'
 
-        #responce_first_url = requests.get(first_url_for_search[0])
-        #get_responce_firs_url = BeautifulSoup(responce_first_url.text, 'lxml')
+    else:
         get_query_item = re.findall("{'query': '(.{15})', 'name':", str(get_responce_from_first_url))
         get_query_shardkey = re.findall("'shardKey': '(.{10,25})', 'filters':", str(get_responce_from_first_url))
 
@@ -79,16 +72,15 @@ def pars_wildberies_items(name_for_search):
         row_items = re.findall(r'"query":"(.*)",', str(BeautifulSoup(get_responce_second_url.text, 'lxml')))
         return row_items
 
-
-
 def get_items_id_dict(name_for_search):
 
     items_id_array = pars_wildberies_items(name_for_search)
     return [x.get('id') for x in items_id_array]
 
-
 def get_full_info_dict_items(text):
+
     items_id_array = get_items_id_dict(text)
+
     for item in items_id_array:
         url_for_search = f'https://www.wildberries.ru/catalog/{item}/detail.aspx'
         responce_url = requests.get(url_for_search)
@@ -96,11 +88,8 @@ def get_full_info_dict_items(text):
         name = re.findall('<meta content="(.*)" itemprop="name"\/>', str(get_responce_url))
         image_url = re.findall('<meta content="(.*)" itemprop="image"\/>', str(get_responce_url))
         price = re.findall('<meta content="(.*)" itemprop="price"\/>', str(get_responce_url))
-        print(url_for_search, item, name, price, image_url)
         return url_for_search, item, name, price, image_url
 
-
-#print(get_full_info_dict_items())
 
 
 
