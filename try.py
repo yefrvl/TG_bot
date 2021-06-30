@@ -1,27 +1,38 @@
-import requests
-import re
-import json
-from bs4 import BeautifulSoup
-from config import first_url_array
+from enum import Enum
 
-def get_first_url(url_array, i=0):
+token = "4225555:AAGmfghjuGOI4sdfsdfs5656sdfsdf_c" #токен бота, тут приведён образец(не настоящий токен)
+db_file = "Mydatabase.vdb"
 
-    name_for_search = 'asics gel excite 8'
+class States(Enum):
+    """
+    в БД Vedis хранимые значения всегда строки,
+    поэтому и тут будем использовать тоже строки (str)
+    """
+    S_START = "0"  # Начало нового диалога
+    S_ENTER_MONTH = "1"
+    S_ENTER_PRICE = "2"
+    S_ENTER_TYPE = "3"
+    S_ENTER_PLACE = "4"
+    S_ENTER_URL="5" #этот статус не входит в базовый поиск
 
-    if len(url_array) == 0:
-        return
+from vedis import Vedis
+import Myconfig as config
 
-    else:
-        item = url_array.pop(0)
-        first_url_for_search = f'{item}{name_for_search}'
-        responce_first_url = requests.get(first_url_for_search)
-        get_responce_first_url = BeautifulSoup(responce_first_url.text, 'lxml')
-        get_for_bool = re.findall(r'<p>(.*)<\/p>', str(get_responce_first_url), re.S)
-        if len(str(get_for_bool)) < 5:
-            return get_first_url(url_array)
-        get_for_bool_type_item = json.loads(str(get_for_bool[0]))
-        #if bool(get_for_bool_type_item) == True:
-        return get_for_bool_type_item
+# Запрашиваем из базы статус пользователя
+def get_current_state(user_id):
+    with Vedis(config.db_file) as db:
+        try:
+            return db[user_id]
+        except KeyError:  #Если такого ключа/пользователя в базе не оказалось
+            return config.States.S_START.value  #Значение по умолчанию-начало диалога
 
-
-print(get_first_url(first_url_array))
+# Сохраняем текущий статус пользователя в базу
+def set_state(user_id, value):
+    with Vedis(config.db_file) as db:
+        try:
+            db[user_id] = value
+            return True
+        except:
+            print('Проблемка с юзером!')
+            # тут желательно как-то обработать ситуацию
+            return False

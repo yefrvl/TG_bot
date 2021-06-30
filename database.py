@@ -11,3 +11,11 @@ class DataBase:
                                            host='127.0.0.1',
                                            port='5432')
         self.cursor = self.connection.cursor()
+
+
+    def add_user(self, data):
+        with self.connection:
+            self.data = data
+            query = "INSERT INTO users (user_id, number) values (%s, %s)"
+            self.cursor.executemany(query, [data])
+            self.connection.commit()
