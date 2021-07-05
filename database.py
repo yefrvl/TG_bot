@@ -12,10 +12,18 @@ class DataBase:
                                            port='5432')
         self.cursor = self.connection.cursor()
 
+    def current_state(self, user_id):
+        """Функция проверки наличия пользователя в базе данных"""
+        self.user_id = user_id
+        with self.connection:
+            self.cursor.execute("SELECT *FROM users WHERE user_id = %s" % user_id)
+            self.connection.commit()
+            return bool(self.cursor.fetchall())
 
-    def add_user(self, data):
+
+    def add_new_user(self, data):
         with self.connection:
             self.data = data
-            query = "INSERT INTO users (user_id, number) values (%s, %s)"
+            query = "INSERT INTO users (user_id, status, favorit_url, find_result) values (%s, %s, %s, %s)"
             self.cursor.executemany(query, [data])
             self.connection.commit()
