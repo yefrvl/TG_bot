@@ -6,8 +6,8 @@ class DataBase:
     def __init__(self):
         """Функция подключения к базе данных"""
         self.connection = psycopg2.connect(database='postgres_data',
-                                           user='admin',
-                                           password='12345',
+                                           user='postgres',
+                                           password='vlad8908',
                                            host='127.0.0.1',
                                            port='5432')
         self.cursor = self.connection.cursor()
@@ -24,6 +24,12 @@ class DataBase:
     def add_new_user(self, data):
         with self.connection:
             self.data = data
-            query = "INSERT INTO users (user_id, status, favorit_url, find_result) values (%s, %s, %s, %s)"
+            query = "INSERT INTO users (user_id, status, favorit_url, find_results) values (%s, %s, %s, %s)"
             self.cursor.executemany(query, [data])
             self.connection.commit()
+
+    def check_status(self, user_id, status):
+        self.user_id = user_id
+        self.status = status
+        with self.connection:
+            self.cursor.execute("SELECT ")
