@@ -1,25 +1,53 @@
 import parser_wb
 import telebot
 import config
+from database import UsersDataBase
 import psycopg2
 
-
+db = UsersDataBase()
 
 bot = telebot.TeleBot(config.token)
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
     chat_id = message.chat.id
-    msg = bot.send_message(chat_id, 'Введите название искомого товара')
-    bot.register_next_step_handler(msg, give_me_url)
+    bool_state = db.current_state(chat_id)
+    if bool_state == True:
+        state = db.check_status(chat_id)
+        if state == config.States.S_CHOICE_TYPE_ITEM:
+            bot.send_message(message.chat.id, "Выберите тип товара /clothes или /shoes или /others")
+        elif state == config.States.S_FIND:
+            bot.send_message(message.chat.id, "Введите поиск /search или вставьте ссылку /addURL")
+        elif state == config.States.S_ADD_FAVORIT:
+            bot.send_message(message.chat.id, "Ваш список отслеживания")
+    else:
+        status = config.States.S_START.value
+        db.add_new_user([chat_id, status, ' '])
+        bot.send_message(chat_id, 'выберите тип товара /clothes или /shoes или /others')
+        db.change_status(chat_id, config.States.S_CHOICE_TYPE_ITEM.value)
+        #bot.register_next_step_handler(chat_id, choice_type)
+
+@bot.message_handler(func=lambda message: db.check_status(message.chat.id) == config.States.S_CHOICE_TYPE_ITEM)
+def choice_type(message):
+    bot.send_message(message.chat.id, "Напоминаю, выберите тип товара /clothes или /shoes или /others")
+
+
+@bot.message_handler(commands=['search'])
+
+def enter_name(message):
+
+    bot.send_message(message.chat.id, 'Введите наименование искомого товара')
+    bot.register_next_step_handler(message, give_me_url)
 
 
 def give_me_url(message):
 
-    chat_id = message.chat.id
-    text = message.text.lower()
-    msg = bot.send_message(chat_id, parser_wb.get_full_info_dict_items(text))
+    msg = bot.send_message(message.chat.id, parser_wb.get_full_info_dict_items(message.text))
     bot.register_next_step_handler(msg, start_handler)
+
+#@bot.message_handler(commands=['addURL'])
+
+
 
 
 

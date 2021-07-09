@@ -1,7 +1,7 @@
 import psycopg2
 
 
-class DataBase:
+class UsersDataBase:
 
     def __init__(self):
         """Функция подключения к базе данных"""
@@ -24,12 +24,20 @@ class DataBase:
     def add_new_user(self, data):
         with self.connection:
             self.data = data
-            query = "INSERT INTO users (user_id, status, favorit_url, find_results) values (%s, %s, %s, %s)"
+            query = "INSERT INTO users (user_id, status, find_results) values (%s, %s, %s)"
             self.cursor.executemany(query, [data])
             self.connection.commit()
 
-    def check_status(self, user_id, status):
+    def check_status(self, user_id):
         self.user_id = user_id
-        self.status = status
         with self.connection:
-            self.cursor.execute("SELECT ")
+            self.cursor.execute("SELECT status FROM users WHERE user_id = %s" %user_id)
+            status = self.cursor.fetchone()
+        return status
+
+    def change_status(self, user_id, status):
+        self.user_id, self.status = user_id, status
+        with self.connection:
+            sql = "UPDATE users SET status = %s WHERE user_id = %s"
+            self.cursor.execute(sql, (self.status, self.user_id))
+            self.connection.commit()
