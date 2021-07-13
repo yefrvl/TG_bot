@@ -1,17 +1,7 @@
-import requests
-from bs4 import BeautifulSoup
-import re
-def get_full_info_others(items_id_array):
+import shelve
+import pandas as pd
+def create_tmp_shelve_db(user_id, item_array):
+    with shelve.open("temp_db") as items:
+        return {user_id:{str(item):f'https://www.wildberries.ru/catalog/{item}/detail.aspx'} for item in item_array}
 
-    for item in items_id_array:
-        url_for_search = f'https://www.wildberries.ru/catalog/{item}/detail.aspx'
-        responce_url = requests.get(url_for_search)
-        get_responce_url = BeautifulSoup(responce_url.text, 'lxml')
-        name = re.findall('<meta content="(.*)" itemprop="name"\/>', str(get_responce_url))
-        image_url = re.findall('<meta content="(.*)" itemprop="image"\/>', str(get_responce_url))
-        price = re.findall('<meta content="(.*)" itemprop="price"\/>', str(get_responce_url))
-        #print(url_for_search, item, name, price, image_url)
-        size = get_responce_url.findAll('label', class_='disabled')
-        return [dis_size.find('span').text for dis_size in size]
-
-print(get_full_info_others([18097679]))
+print(create_tmp_shelve_db('45646456',[18097678, 18097680, 18097683, 18097679, 18097682, 18097681, 18097665, 18097651, 18097653, 13749514, 13749473, 18097742, 18097741, 18097654, 13749516, 16213687, 10502343, 16213678]))

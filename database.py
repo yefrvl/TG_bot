@@ -1,5 +1,5 @@
 import psycopg2
-
+import shelve
 
 class UsersDataBase:
 
@@ -41,3 +41,13 @@ class UsersDataBase:
             sql = "UPDATE users SET status = %s WHERE user_id = %s"
             self.cursor.execute(sql, (self.status, self.user_id))
             self.connection.commit()
+
+
+
+def create_tmp_shelve_db(user_id, item_array):
+    with shelve.open("temp_db") as items:
+
+        {user_id:{str(item):f'https://www.wildberries.ru/catalog/{item}/detail.aspx'} for item in item_array}
+
+
+
