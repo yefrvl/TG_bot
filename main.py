@@ -42,9 +42,18 @@ def message_find_shoes(message):
 
 def find_shoes(message):
 
+    user_id = message.chat.id
     items_array = parser_wb.get_full_info_dict_items(message.text)
-    bot.send_message(message.chat.id, f"По вашему запросу было найдено {len(items_array)} товаров")
-    tmp_items = database.create_tmp_shelve_db(message.chat.id, items_array)
+    bot.send_message(user_id, f"По вашему запросу всего было найдено {len(items_array)} товаров")
+    database.add_tmp_shelve_db(user_id, items_array)
+    tmp_items = database.get_from_tmp_shelve_db(str(user_id))
+    for value in tmp_items.values():
+        bot.send_message(user_id, value)
+        if message.text == "дальше":
+            continue
+        else:
+            bot.send_message(user_id, f"Ссылка на искомый товар {value}")
+
     bot.send_message(message.chat.id, tmp_items)
     #bot.send_message(message.chat.id, parser_wb.get_full_info_dict_items(message.text))
 

@@ -44,10 +44,16 @@ class UsersDataBase:
 
 
 
-def create_tmp_shelve_db(user_id, item_array):
+def add_tmp_shelve_db(user_id, item_array):
     with shelve.open("temp_db") as items:
+        data = {str(item): f'https://www.wildberries.ru/catalog/{item}/detail.aspx' for item in item_array}
+        items[str(user_id)] = data
+        return
 
-        {user_id:{str(item):f'https://www.wildberries.ru/catalog/{item}/detail.aspx'} for item in item_array}
+def get_from_tmp_shelve_db(user_id):
+    with shelve.open("temp_db") as items:
+        return items[str(user_id)]
 
-
-
+def del_tmp_shelve_db(user_id):
+    with shelve.open("temp_db") as items:
+        del items[str(user_id)]
