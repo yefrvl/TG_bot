@@ -1,5 +1,5 @@
 from enum import Enum
-token = '1761116546:AAHi5egtNSa0uNjuni5mAbifizTE8qKLTXU'
+token = 'token:token'
 
 
 url_array = ['https://wbxsearch.wildberries.ru/suggests/male?query=', 'https://wbxsearch.wildberries.ru/exactmatch/v2/male?query=',
